@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz: Cyberbullying</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<style>
+body { font-family:'Segoe UI', sans-serif; }
+
+#quiz-card, #start-screen {
+  border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  background:linear-gradient(#ffffff,#f0f8ff);
+}
+
+#chat-box {
+  background:#e5ddd5;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:15px;
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.bubble-left, .bubble-right {
+  padding:10px 14px;
+  border-radius:12px;
+  max-width:75%;
+  font-size:15px;
+  line-height:1.4;
+}
+.bubble-left {
+  background:white;
+  align-self:flex-start;
+  border-top-left-radius:2px;
+}
+.bubble-right {
+  background:#dcf8c6;
+  align-self:flex-end;
+  border-top-right-radius:2px;
+}
+
+.list-group-item {
+  border-radius:8px;
+  margin-bottom:8px;
+  cursor:pointer;
+  transition:0.2s;
+}
+.list-group-item:hover{ background:#f1f1f1; }
+.selected{ background:#cce5ff!important; border-color:#0d6efd!important; }
+.correct{ background:#d4edda!important; border-color:#28a745!important; color:#155724!important; }
+.wrong{ background:#f8d7da!important; border-color:#dc3545!important; color:#721c24!important; }
+
+#feedback {
+  font-size:20px;
+  font-weight:bold;
+  text-align:center;
+  margin-top:10px;
+  display:none;
+}
+</style>
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5"><div class="row justify-content-center"><div class="col-md-7">
+
+<div id="start-screen" class="p-4 text-center">
+  <h2 class="text-primary">Quiz Cyberbullying</h2>
+  <p>Analise os casos e escolha a melhor atitude</p>
+  <button id="start" class="btn btn-success btn-lg">Começar</button>
+</div>
+
+<div id="quiz-card" class="p-4 d-none">
+  <div class="progress mb-3" style="height:7px">
+    <div id="bar" class="progress-bar bg-primary" style="width:0%"></div>
+  </div>
+
+  <div id="chat-box"></div>
+
+  <div id="options" class="list-group"></div>
+
+  <div id="feedback"></div>
+
+  <button id="actionBtn" class="btn btn-primary btn-lg w-100 mt-3">Confirmar</button>
+
+  <div id="result" class="text-center mt-3 d-none">
+    <h3 class="text-success">Finalizado!</h3>
+    <p>Você acertou <span id="score"></span> de <span id="total"></span></p>
+    <button onclick="location.reload()" class="btn btn-info">Refazer</button>
+  </div>
+</div>
+
+</div></div></div>
+
+<script>
+const q = [
+{t:"Riram do erro de português de um colega no grupo. O que fazer?", o:["Rir junto","Pedir respeito e ajudar","Printar e reenviar","Ignorar"], r:1},
+{t:"Amiga recebe mensagens chatas no privado. Melhor atitude?", o:["Revidar","Apoiar e orientar a denunciar","Postar indireta","Mandar ela ignorar sempre"], r:1},
+{t:"Criaram grupo excluindo um colega. O que fazer?", o:["Entrar e observar","Incluir a pessoa","Divertir-se no grupo","Fingir que não viu"], r:1},
+{t:"Zoam colega por errar no jogo. Melhor reação:", o:["Rir também","Dizer que todos aprendem","Sair do jogo","Gravar para postar"], r:1},
+{t:"Foto de aluno sem permissão no grupo. O que fazer?", o:["Pedir para apagar","Compartilhar","Ignorar","Salvar a foto"], r:0},
+{t:"Imitaram a voz do colega em áudio para rir.", o:["Repetir a brincadeira","Pedir para parar","Encaminhar","Fazer remix do áudio"], r:1},
+{t:"Debocharam da opinião de um colega.", o:["Debochar também","Dialogar com respeito","Mandar figurinha ironizando","Sair do chat"], r:1},
+{t:"Riram da resposta errada da aluna na aula online.", o:["Pedir respeito","Gravar a reação","Rir também","Mandar no grupo"], r:0},
+{t:"Querem expulsar colega 'só por brincadeira'.", o:["Dizer que não é legal","Participar","Ajudar a expulsar","Observar sem falar"], r:0},
+{t:"Crítica anônima: 'seu trabalho ficou ruim'.", o:["Agradecer e pedir dica","Revidar","Compartilhar","Xingar de volta"], r:0},
+{t:"Colega pede ajuda no grupo e ignoram.", o:["Ajudar","Curtir a mensagem","Ignorar","Mandar 'se vira'"], r:0},
+{t:"Querem copiar seu dever. O que fazer?", o:["Enviar pronto","Explicar como faz","Ignorar","Passar respostas erradas"], r:1},
+{t:"Zoam o gosto musical de um colega.", o:["Defender e respeitar","Rir junto","Criar meme","Espalhar a zoeira"], r:0},
+{t:"Colega saiu do grupo após piadas.", o:["Chamar no PV e apoiar","Fazer novas piadas","Ignorar","Comemorar"], r:0},
+{t:"Criticam a foto do pet de um colega.", o:["Elogiar o pet","Rir","Comparar com outros pets","Ignorar"], r:0},
+{t:"Discussão vira ataques pessoais.", o:["Atacar também","Pedir calma e respeito","Printar para usar depois","Sair provocando"], r:1},
+{t:"Colega pede ajuda tarde da noite.", o:["Responder quando puder","Xingar a hora","Postar no grupo","Ignorar sempre"], r:0},
+{t:"Querem forçar colega tímido a ligar mic.", o:["Dizer que não é obrigado","Forçar também","Zoar a timidez","Gravar a reação"], r:0},
+{t:"Pessoa insiste no privado sem permissão.", o:["Criar limites e se precisar bloquear","Expor no grupo","Continuar normalmente","Responder com raiva"], r:0},
+{t:"Querem 'testar' excluir um colega.", o:["Dizer que é errado","Participar do teste","Rir","Apoiar a ideia"], r:0},
+{t:"Meme deixou alguém desconfortável.", o:["Respeitar e parar","Enviar de novo","Dizer que é frescura","Continuar a piada"], r:0},
+{t:"Criticam desenho de colega de forma grossa.", o:["Elogiar o esforço","Rir","Compartilhar","Comparar com outro desenho"], r:0},
+{t:"Votação: 'quem é mais chato da sala?'", o:["Pedir para apagar","Votar","Compartilhar","Criar nova enquete"], r:0},
+{t:"Mensagem: 'fulano não existe pra mim'.", o:["Incentivar diálogo","Rir","Concordar","Espalhar a frase"], r:0},
+{t:"Grupo combina excluir colega de propósito.", o:["Defender a inclusão","Apoiar a exclusão","Ignorar","Depois contar a todo mundo"], r:0}
+];
+
+let i=0, score=0, selected=null, locked=false;
+const startBtn=document.getElementById("start");
+const screen=document.getElementById("start-screen");
+const card=document.getElementById("quiz-card");
+const chatBox=document.getElementById("chat-box");
+const options=document.getElementById("options");
+const btn=document.getElementById("actionBtn");
+const feedback=document.getElementById("feedback");
+const bar=document.getElementById("bar");
+
+startBtn.onclick=()=>{screen.classList.add("d-none");card.classList.remove("d-none");load()}
+
+function load(){
+  locked=false; selected=null; feedback.style.display="none";
+  btn.textContent="Confirmar"; options.innerHTML="";
+  bar.style.width=(i/q.length*100)+"%";
+
+  chatBox.innerHTML="";
+  const bubble=document.createElement("div");
+  bubble.className = i%2===0 ? "bubble-left" : "bubble-right";
+  bubble.textContent = q[i].t;
+  chatBox.appendChild(bubble);
+
+  q[i].o.forEach((txt,idx)=>{
+    let op=document.createElement("div");
+    op.className="list-group-item";
+    op.textContent=txt;
+    op.onclick=()=>choose(op,idx);
+    options.appendChild(op);
+  });
+}
+
+function choose(el,idx){
+  if(locked) return;
+  document.querySelectorAll(".list-group-item").forEach(x=>x.classList.remove("selected"));
+  el.classList.add("selected");
+  selected=idx;
+}
+
+btn.onclick=()=>{
+  if(!locked){
+    if(selected==null) return alert("Escolha uma opção!");
+
+    locked=true;
+    const correct = q[i].r;
+    document.querySelectorAll(".list-group-item").forEach((el,idx)=>{
+      el.style.pointerEvents="none";
+      if(idx===correct) el.classList.add("correct");
+      if(idx===selected && selected!==correct) el.classList.add("wrong");
+    });
+
+    if(selected===correct){
+      score++;
+      feedback.textContent="✅ Certo";
+      feedback.style.color="#0f5132";
+    } else {
+      feedback.textContent="❌ Errado";
+      feedback.style.color="#842029";
+    }
+    feedback.style.display="block";
+    btn.textContent="Próxima";
+  } else {
+    i++;
+    i < q.length ? load() : end();
+  }
+}
+
+function end(){
+  document.getElementById("result").classList.remove("d-none");
+  document.getElementById("score").textContent=score;
+  document.getElementById("total").textContent=q.length;
+  btn.style.display="none";
+  chatBox.innerHTML="";
+  options.innerHTML="";
+  bar.style.width="100%";
+}
+</script>
+</body>
+</html>
