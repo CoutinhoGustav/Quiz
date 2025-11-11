@@ -125,6 +125,7 @@ const q = [
 {t:"Grupo combina excluir colega de propósito.", o:["Defender a inclusão","Apoiar a exclusão","Ignorar","Depois contar a todo mundo"], r:0}
 ];
 
+q.sort(() => Math.random() - 0.5);
 let i=0, score=0, selected=null, locked=false;
 const startBtn=document.getElementById("start");
 const screen=document.getElementById("start-screen");
